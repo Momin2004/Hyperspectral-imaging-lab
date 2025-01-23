@@ -10,6 +10,7 @@ This repository is for the mechanical part of the hyperspectral lab setup built 
 
 ## Class Diagram
 Here is a Class Diagram of the current code structure. There is currently no Encoder, so this part has not yet been tested. The translation also remains not finished. 
-![image](https://github.com/user-attachments/assets/254449d9-2b1c-4468-b140-595f3dcc4d4c)
+![image](https://github.com/user-attachments/assets/36a29e96-6816-480a-adef-02e3fac6f22b)
+
 
 ##
