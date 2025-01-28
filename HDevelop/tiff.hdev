@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="24.05.0.0">
+<procedure name="main">
+<interface/>
+<body>
+<c>* Define source and destination paths</c>
+<l>SourcePathGoed := 'C:/Users/Momin/Downloads/output_path/output_path/goed'</l>
+<l>SourcePathSlecht := 'C:/Users/Momin/Downloads/output_path/output_path/slecht'</l>
+<l>DestPathGoed := 'C:/Users/Momin/Downloads/output_path/output_path/converted/goed'</l>
+<l>DestPathSlecht := 'C:/Users/Momin/Downloads/output_path/output_path/converted/slecht'</l>
+<c></c>
+<c>* Process 'goed' folder</c>
+<l>list_files(SourcePathGoed, 'files', HobjFilesGoed)</l>
+<l>for Index := 0 to |HobjFilesGoed| - 1 by 1</l>
+<c>    * Read each hobj file</c>
+<l>    HobjFile := HobjFilesGoed[Index]</l>
+<l>    read_image(Image, HobjFile)</l>
+<c>    </c>
+<c>    * Define output filename with .tiff extension</c>
+<l>    TiffFile := DestPathGoed + '/' +Index + '.tiff'</l>
+<c>    </c>
+<c>    * Write image as tiff</c>
+<l>    write_image(Image, 'tiff', 0, TiffFile)</l>
+<l>endfor</l>
+<c></c>
+<c>* Process 'slecht' folder</c>
+<l>list_files(SourcePathSlecht, 'files', HobjFilesSlecht)</l>
+<l>for Index := 0 to |HobjFilesSlecht| - 1 by 1</l>
+<c>    * Read each hobj file</c>
+<l>    HobjFile := HobjFilesSlecht[Index]</l>
+<l>    read_image(Image, HobjFile)</l>
+<c>    </c>
+<c>    * Define output filename with .tiff extension</c>
+<l>    TiffFile := DestPathSlecht + '/' + Index + '.tiff'</l>
+<c>    </c>
+<c>    * Write image as tiff</c>
+<l>    write_image(Image, 'tiff', 0, TiffFile)</l>
+<l>endfor</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

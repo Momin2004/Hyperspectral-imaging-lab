@@ -1,0 +1,8 @@
+tifffile
+scikit-learn
+keras
+tensorflow
+matplotlib
+opencv-python
+xgboost
+joblib

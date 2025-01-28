@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="24.05.0.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>good_path := 'C:/Data/output_path/output_path/goed/'</l>
+<l>bad_path := 'C:/Data/output_path/output_path/slecht/'</l>
+<l>test_path := 'C:/Data/output_path/output_path/test/'  // Path for images to classify</l>
+<c></c>
+<c>* Initialize visualization.</c>
+<l>dev_close_window ()</l>
+<l>dev_open_window (0, 0, 512, 512, 'black', WindowHandleImage)</l>
+<l>set_display_font (WindowHandleImage, 14, 'mono', 'true', 'false')</l>
+<l>dev_set_window (WindowHandleImage)</l>
+<c></c>
+<c>* Initialize the k-NN classifier for hyperspectral data</c>
+<l>NumBands := 224  // Number of spectral channels for Specim FX17</l>
+<l>create_class_knn (NumBands, KNNHandle)  </l>
+<c></c>
+<c>* Set colors and labels for the classes</c>
+<l>ClassColors := ['green', 'red']</l>
+<l>ClassNames := ['Good Onion', 'Bad Onion']</l>
+<c></c>
+<c>* Add good onion samples to k-NN classifier</c>
+<l>list_files (good_path, 'files', GoodFileList)</l>
+<l>for i := 0 to |GoodFileList| - 1 by 1</l>
+<l>    FileName := GoodFileList[i] </l>
+<c></c>
+<l>    read_image (Image, FileName)</l>
+<c></c>
+<l>    access_channel (Image, ImageDisplay, 3)</l>
+<l>    threshold (ImageDisplay, Regions, 0.1, 255) </l>
+<c>    </c>
+<l>    compactness (Regions, Compactness)</l>
+<l>    select_obj (Regions, ObjectSelected, find(Compactness, min(Compactness)) + 1)</l>
+<c></c>
+<l>    dev_display (ImageDisplay)</l>
+<l>    dev_set_color (ClassColors[0])  // Green for good onion</l>
+<l>    dev_display (ObjectSelected)</l>
+<l>    dev_disp_text ('Good Onion Sample', 'window', 'top', 'left', 'green', [], [])</l>
+<c></c>
+<l>    get_region_points (ObjectSelected, Rows, Columns)</l>
+<l>    get_grayval (Image, Rows, Columns, Grayval)</l>
+<l>    add_sample_class_knn (KNNHandle, Grayval, gen_tuple_const(|Grayval| / NumBands, 0))</l>
+<l>endfor</l>
+<c></c>
+<c>* Add bad onion samples to k-NN classifier</c>
+<l>list_files (bad_path, 'files', BadFileList)</l>
+<l>for i := 0 to |BadFileList| - 1 by 1</l>
+<l>    FileName := BadFileList[i]</l>
+<c></c>
+<l>    read_image (Image, FileName)</l>
+<c></c>
+<l>    access_channel (Image, ImageDisplay, 3)</l>
+<l>    threshold (ImageDisplay, Regions, 0.1, 255)</l>
+<c>    </c>
+<l>    compactness (Regions, Compactness)</l>
+<l>    select_obj (Regions, ObjectSelected, find(Compactness, min(Compactness)) + 1)</l>
+<c></c>
+<c>    * Display for debugging (optional)</c>
+<l>    dev_display (ImageDisplay)</l>
+<l>    dev_set_color (ClassColors[1])  // Red for bad onion</l>
+<l>    dev_display (ObjectSelected)</l>
+<l>    dev_disp_text ('Bad Onion Sample', 'window', 'top', 'left', 'red', [], [])</l>
+<c></c>
+<c>    * Extract pixel values within the region and add to k-NN as bad class (label 1)</c>
+<l>    get_region_points (ObjectSelected, Rows, Columns)</l>
+<l>    get_grayval (Image, Rows, Columns, Grayval)</l>
+<l>    add_sample_class_knn (KNNHandle, Grayval, gen_tuple_const(|Grayval| / NumBands, 1))</l>
+<l>endfor</l>
+<c></c>
+<c>* Train the k-NN classifier</c>
+<l>train_class_knn (KNNHandle, [], [])</l>
+<c></c>
+<c>* Classify a new test image</c>
+<l>list_files (test_path, 'files', TestFileList)</l>
+<l>for i := 0 to |TestFileList| - 1 by 1</l>
+<l>    FileName := TestFileList[i]</l>
+<c></c>
+<l>    read_image (ImageClassify, FileName)</l>
+<c></c>
+<l>    access_channel (ImageClassify, ImageDisplay, 3)</l>
+<l>    auto_threshold (ImageDisplay, Regions, 0.01)</l>
+<l>    compactness (Regions, Compactness)</l>
+<l>    select_obj (Regions, ObjectSelected, find(Compactness, min(Compactness)) + 1)</l>
+<c></c>
+<l>    get_region_points (ObjectSelected, Rows, Columns)</l>
+<l>    get_grayval (ImageClassify, Rows, Columns, Grayval)</l>
+<l>    RejectionThreshold := 0.1</l>
+<l>    classify_image_class_knn (ImageClassify, ClassRegions, DistanceImage, KNNHandle, RejectionThreshold)</l>
+<c></c>
+<c></c>
+<c>    *Magic*</c>
+<l>    area_center (ClassRegions, NumGreenPixels, _, _)</l>
+<l>    if (NumGreenPixels &lt;= 4000)</l>
+<l>        dev_set_color ('red')  // Change display color to red for bad onion</l>
+<l>    else</l>
+<l>        dev_set_color ('green')  // Keep green for good onion</l>
+<l>    endif</l>
+<c></c>
+<c>    * Display classification result</c>
+<l>    dev_display (ImageDisplay)</l>
+<l>    dev_display (ClassRegions)</l>
+<l>    String := 'Classification Result'</l>
+<l>    dev_disp_text (String, 'window', 'top', 'left', 'black', [], [])</l>
+<l>    if (NumGreenPixels &lt;= 4000)</l>
+<l>        dev_disp_text ('Bad Onion', 'window', 'bottom', 'left', 'red', [], [])</l>
+<l>    else</l>
+<l>        dev_disp_text ('Good Onion', 'window', 'bottom', 'left', 'green', [], [])</l>
+<l>    endif</l>
+<l>    disp_continue_message (WindowHandleImage, 'black', 'true')</l>
+<l>    stop ()</l>
+<l>endfor</l>
+<c></c>
+<c>* Clean up</c>
+<l>clear_class_knn (KNNHandle)</l>
+<l>close_window (WindowHandleImage)</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

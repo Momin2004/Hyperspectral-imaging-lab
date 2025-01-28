@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="24.05.0.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image (HyperspectralImage, 'C:/Data/output_path/output_path/goed/reflectance_image_3.hobj')</l>
+<c></c>
+<l>count_channels(HyperspectralImage, NumChannels)</l>
+<l>if (NumChannels == 0)</l>
+<l>    stop()</l>
+<l>endif</l>
+<l>access_channel(HyperspectralImage, FirstChannel, 1)</l>
+<l>get_image_size(FirstChannel, Width, Height)</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', ImageWindowID)</l>
+<l>dev_display(FirstChannel)</l>
+<c></c>
+<l>while (true)</l>
+<l>    get_mbutton(ImageWindowID, Row, Column, Button)</l>
+<l>    if (Button == 1)</l>
+<l>        SpectralValues := []</l>
+<c></c>
+<l>        for Index := 1 to NumChannels by 1</l>
+<l>            access_channel(HyperspectralImage, Channel, Index)</l>
+<l>            get_grayval(Channel, Row, Column, GrayValue)</l>
+<l>            SpectralValues := [SpectralValues, GrayValue]</l>
+<l>        endfor</l>
+<c></c>
+<l>        dev_inspect_ctrl(['plot', SpectralValues])</l>
+<l>    endif</l>
+<l>endwhile</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
